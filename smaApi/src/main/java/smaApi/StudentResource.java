@@ -1,14 +1,12 @@
 package smaApi;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 import auth.kayodeo1.com.auth;
 import auth.kayodeo1.com.jwtUtil;
 import auth.kayodeo1.com.mailSender;
 import io.jsonwebtoken.Claims;
 import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
@@ -43,22 +41,22 @@ public class StudentResource {
 
     }
 
-   
+
     // READ (single student)
     @GET
     @Path("/{email}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getStudent(@PathParam("email") String userID, @QueryParam("jwt") String token) {
-    	Claims jwtValues = jwt.parseJWT(token);
+    	Claims jwtValues = jwtUtil.parseJWT(token);
     	if (jwtValues.get("email").equals(userID)) {
     		studentModel student = new studentModel();
     		return Response.ok(student).build();
     	}
-    	
-    	
+
+
 		return null;
-     
-    	
+
+
     }
 
     // UPDATE
@@ -67,12 +65,12 @@ public class StudentResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateStudent(@PathParam("userID") String userID, @QueryParam("jwt") String token) {
-    	
-    	
+
+
 		return null;
 
-    	
-    	
+
+
     }
 
 
@@ -85,7 +83,7 @@ public class StudentResource {
     	 try {
              studentModel Student = helper.getStudent(student.getEmail(), student.getPassword());
              if (Student != null) {
-            	 Student.setJwt(jwt.createJWT(Student))  ;
+            	 Student.setJwt(jwtUtil.createJWT(Student))  ;
             	 return Response.ok(Student).build();
              } else {
                  return Response.status(Response.Status.NOT_FOUND).entity("Student not found or incorrect password").build();
@@ -96,7 +94,7 @@ public class StudentResource {
          }
      }
 
-    
-    
-    
+
+
+
 }

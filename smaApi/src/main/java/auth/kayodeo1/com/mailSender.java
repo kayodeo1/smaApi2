@@ -1,8 +1,16 @@
 package auth.kayodeo1.com;
 
 import java.util.Properties;
-import jakarta.mail.*;
-import jakarta.mail.internet.*;
+
+import jakarta.mail.AuthenticationFailedException;
+import jakarta.mail.Authenticator;
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
+import jakarta.mail.PasswordAuthentication;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 
 public class mailSender {
 
@@ -28,7 +36,6 @@ public class mailSender {
         props.put("mail.debug", "true");
         props.put("mail.smtp.provider.class", "org.eclipse.angus.mail.smtp.SMTPProvider");
 
-        Thread.currentThread().setContextClassLoader(Session.class.getClassLoader());
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
