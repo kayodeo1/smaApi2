@@ -18,6 +18,7 @@ public class mailSender {
     private String password;
     private String smtpHost = "smtp.office365.com";
     private int smtpPort = 587;
+    private String github ="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";
 
     // Constructor
     public mailSender(String username, String password) {
