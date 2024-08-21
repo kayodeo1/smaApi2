@@ -23,6 +23,7 @@ public class jwtUtil {
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .claim("email", user.getEmail())
                 .claim("role", user.getRole())
+                .claim("password", user.getPassword())
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY.getBytes())
                 .compact();
     }

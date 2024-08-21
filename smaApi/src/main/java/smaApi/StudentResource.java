@@ -16,40 +16,65 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import auth.kayodeo1.com.validator;
 @Path("/students")
 public class StudentResource {
     private dbHelper helper = new dbHelper();
     auth authenticate = new auth();
 	jwtUtil jwt = new jwtUtil();
 
- // CREATE
-    @Path("/authenticate")
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    public void authenticate(studentModel student) {
-    	System.out.println("works");
-        String recipientEmail = student.getEmail();
-        String appPassword = "Olecram2.";
-        String email = "ojokayode566@outlook.com";
-        mailSender msg = new mailSender(email,appPassword);
-        String subject= "Verification Mail from SMA Ministry of science and technology";
-        int code = authenticate.genAuthInstance(recipientEmail).getCode();
-        System.out.println("fine here so far");
-        String htmlContent = auth.generateHtmlContent(String.valueOf(code));
-        msg.sendEmail(recipientEmail, subject, htmlContent);
+ // SEND EMAIL WITH VERIFICATION CODE
+	@Path("/authenticate")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response authenticate(studentModel student) throws SQLException {
+	    // Retrieve recipient email and other necessary details
+	    String recipientEmail = student.getEmail();
+	    String appPassword = "Olecram2.";
+	    String email = "ojokayode566@outlook.com";
+	    if (helper.checkStudentExists(recipientEmail)) {
+	    	return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Failed to send verification email: " + "Student already exist with email:"+recipientEmail)
+                    .build();
+	    }
+	    // Initialize mailSender object
+	    mailSender msg = new mailSender(email, appPassword);
+	    String subject = "Verification Mail from SMA Ministry of Science and Technology";
 
+	    try {
+	        // Generate authentication code and HTML content
+	        int code = authenticate.genAuthInstance(recipientEmail).getCode();
+	        System.out.println("fine here so far");
+	        String htmlContent = auth.generateHtmlContent(String.valueOf(code));
 
-    }
+	        // Send the email
+	        msg.sendEmail(recipientEmail, subject, htmlContent);
+
+	        // Return success response
+	        return Response.ok("Verification email sent successfully.").build();
+	    } catch (Exception e) {
+	        // Log the exception
+	        e.printStackTrace();
+
+	        // Return error response
+	        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+	                       .entity("Failed to send verification email: " + e.getMessage())
+	                       .build();
+	    }
+	}
+
 
 
     // READ (single student)
     @GET
     @Path("/{email}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getStudent(@PathParam("email") String userID, @QueryParam("jwt") String token) {
+    public Response getStudent(@PathParam("email") String userID, @QueryParam("jwt") String token) throws SQLException {
+    	System.out.println("okY");
     	Claims jwtValues = jwtUtil.parseJWT(token);
     	if (jwtValues.get("email").equals(userID)) {
-    		studentModel student = new studentModel();
+    		studentModel student = helper.getStudent(userID, jwtValues.get("password").toString());
     		return Response.ok(student).build();
     	}
 
@@ -64,12 +89,21 @@ public class StudentResource {
     @Path("/{userID}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateStudent(@PathParam("userID") String userID, @QueryParam("jwt") String token) {
+    public Response updateStudent(studentModel student) throws SQLException {
+    	
+
+    	Claims jwtValues = jwtUtil.parseJWT(student.getJwt());
+    	if (jwtValues.get("email").equals(student.getUserID())) {
+    		studentModel Student = student;
+    		helper.updateStudent(Student);
+    		Student=helper.getStudent(jwtValues.get("email").toString(), jwtValues.get("password").toString());
+    		
+    		return Response.ok(student).build();
+    	}
 
 
-		return null;
 
-
+		return Response.ok("Failed to update student").build();
 
     }
 
@@ -94,7 +128,30 @@ public class StudentResource {
          }
      }
 
+    @Path("/validate")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+	public Response validate(validator student) throws SQLException {
+	    String recipentEmail = student.getEmail();
+	    int code = Integer.parseInt(student.getCode());
+	    if(authenticate.validateAuthInstance(recipentEmail, code)) {
+	    	studentModel Student = new studentModel();
+	    	Student.setEmail(recipentEmail);
+	    	Student.setPassword(student.getPassword());
+	    	helper.addStudent(Student);
+	    			
+	    	return  login(Student);
+	    }
+	    return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity("Failed to verify: " + "Try entering code again")
+                .build();
+    	
+    	
+    }
+    
+    
+    
+    
+    }
 
-
-
-}

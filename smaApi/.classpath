@@ -6,13 +6,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src/main/java"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/Apache Tomcat v10.1">
-		<attributes>
-			<attribute name="owner.project.facets" value="jst.web"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
-	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry exported="true" kind="lib" path="/Users/mac/Downloads/postgresql-42.7.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="/Users/mac/Downloads/jjwt-api-0.11.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="/Users/mac/Downloads/jjwt-impl-0.11.5.jar"/>
@@ -46,5 +40,7 @@
 	<classpathentry exported="true" kind="lib" path="/Users/mac/Downloads/jaxrs-ri/lib/jersey-media-sse.jar"/>
 	<classpathentry exported="true" kind="lib" path="/Users/mac/Downloads/jaxrs-ri/lib/jersey-server.jar"/>
 	<classpathentry exported="true" kind="lib" path="/Users/mac/Downloads/json-web-token-2.1.6.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
+	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/Apache Tomcat v10.1 (2)"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

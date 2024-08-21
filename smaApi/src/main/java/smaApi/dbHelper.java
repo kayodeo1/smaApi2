@@ -8,7 +8,7 @@ public class dbHelper {
 	connectDB db = new connectDB();
 	ArrayList<studentModel> studentsList ;
 	public boolean addStudent(studentModel student ) throws SQLException {
-		String query = "insert into smaStudents (user_id,password) values ('"+student.getEmail()+"','"+student.getPassword()+"')";
+		String query = "insert into smaStudents (email,password) values ('"+student.getEmail()+"','"+student.getPassword()+"')";
 		if (!checkStudentExists(student.getEmail())) {
 			db.executeQuery(query, "2377");
 			return true;
@@ -28,7 +28,7 @@ public class dbHelper {
 		}
 		return false;
 	}
-	private boolean checkStudentExists(String email) throws SQLException {
+	public boolean checkStudentExists(String email) throws SQLException {
 		ResultSet rs = db.executeQuery("select * from smaStudents where email = '"+ email+"'","2377");
 		if (rs.next()) {
 			return true;
@@ -71,15 +71,18 @@ public class dbHelper {
 			studentModel res = new studentModel ();
 			res.setUserID(result.getInt(1));
 			res.setEmail(result.getString(2));
-			res.setPassword("*******");
+			res.setPassword(result.getString(3));
 			res.setInstitution("Ministry of Science and Tech");
 			return res;
 		}
 		System.out.println("wrong password");
 		return null;
 	}
-	public void updateStudent (studentModel s) {
+	public boolean updateStudent (studentModel s) {
 		//TODO
+		String query ="update smatudents where";
+		return false;
+		
 
 	}
 }

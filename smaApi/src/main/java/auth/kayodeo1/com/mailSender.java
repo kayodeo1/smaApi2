@@ -32,10 +32,9 @@ public class mailSender {
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.host", smtpHost);
-        props.put("mail.smtp.port", String.valueOf(smtpPort));
-        props.put("mail.smtp.ssl.trust", smtpHost);
+        props.put("mail.smtp.port", smtpPort);
         props.put("mail.debug", "true");
-        props.put("mail.smtp.provider.class", "org.eclipse.angus.mail.smtp.SMTPProvider");
+
 
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
@@ -51,22 +50,11 @@ public class mailSender {
             message.setSubject(subject);
             message.setContent(messageContent, "text/html");
 
-            Transport transport = session.getTransport("smtp");
-            transport.connect(smtpHost, smtpPort, username, password);
-            transport.sendMessage(message, message.getAllRecipients());
-            transport.close();
+            Transport.send(message);
 
             System.out.println("Email sent successfully!");
-
-        } catch (AuthenticationFailedException e) {
-            System.out.println("Authentication failed: " + e.getMessage());
-            e.printStackTrace();
         } catch (MessagingException e) {
-            System.out.println("Messaging exception: " + e.getMessage());
-            e.printStackTrace();
-        } catch (Exception e) {
-            System.out.println("Unexpected error: " + e.getMessage());
-            e.printStackTrace();
+            throw new RuntimeException("Failed to send email", e);
         }
     }
 }
