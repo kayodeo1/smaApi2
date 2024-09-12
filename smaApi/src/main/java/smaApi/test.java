@@ -5,15 +5,18 @@ package smaApi;
 
 import java.sql.SQLException;
 
+import auth.kayodeo1.com.mailSender;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.AddressException;
+
 public class test {
 
-	public static void main(String[] args) throws SQLException {
+	public static void main(String[] args) throws SQLException, AddressException, MessagingException {
 		// TODO Auto-generated method stub
-		dbHelper db = new dbHelper();
-		studentModel student = new dbHelper().getStudent("Toyo", "c++");
-System.out.println(student.toString());
-System.out.println(db.getAllStudent());
+	mailSender s = new mailSender("adnanopeyemi148@gmail.com","Akinpelu2003");
 
-	}
+	s.sendEmail("ojokayode566@outlook.com", "fuck ", "testing");
 
+
+}
 }
