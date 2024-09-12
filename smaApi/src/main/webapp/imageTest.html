@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Image Uploader</title>
+    <style>
+      /* Add some basic styling to center the form */
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      form {
+        display: inline-block;
+        text-align: center;
+      }
+      label {
+        display: block;
+        margin-bottom: 10px;
+      }
+      .icon {
+        font-size: 24px;
+        margin-bottom: 5px;
+      }
+      .profile-picture {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        margin-bottom: 20px;
+      }
+
+      .plus{
+        font-size: 100px;
+        font-weight: 700;
+      }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  </head>
+  <body>
+    <form action="uploadImage" method="post" enctype="multipart/form-data">
+        <div class="plus">+</div>
+        <input name="userId" type="text">
+      <input type="file" name="profilePicture"  id="profilePicture">
+      <input name="jwt" type="hidden" id="jwtInput">
+      <label for="image-input">
+        <i class="fas fa-camera icon" aria-hidden="true"></i>
+        Select an image
+      </label>
+      <button type="submit">Upload Image</button>
+    </form>
+  </body>
+</html>
