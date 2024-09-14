@@ -33,7 +33,7 @@ public class PasswordCrypto {
 		keys.add("JaVa");
 		keys.add("Mira");
 		String key = KeyGenerator.generateKey(keys);
-		String value =PasswordCrypto.decrypt("HyjtjUtWi1//EgwoD1LNkA=="
+		String value =PasswordCrypto.decrypt("viioKQ2MQdwcTSaeMEEntw=="
 				+ "", key);
 		System.out.println(value);
 

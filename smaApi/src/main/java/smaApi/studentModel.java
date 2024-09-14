@@ -17,8 +17,8 @@ public class studentModel {
 	private String firstName;
 	private String middleName;
 	private String lastName;
-	private String startDate="00/00/0000";
-	private String endDate="00/00/0001";
+	private String startDate;
+	private String endDate;
 	private String role="Student";
 	private String institution;
 	private String jwt;
@@ -185,6 +185,9 @@ public class studentModel {
 		this.role=role;
 	}
 public double getPercentComplete(String startDateStr, String endDateStr) {
+	if(startDateStr==null) {
+		return 0;
+	}
     try {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         Date startDate = sdf.parse(startDateStr);

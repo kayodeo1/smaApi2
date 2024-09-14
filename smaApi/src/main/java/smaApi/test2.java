@@ -5,7 +5,7 @@ package smaApi;
 
 import java.sql.SQLException;
 
-import auth.kayodeo1.com.mailSender;
+import auth.kayodeo1.com.apacheMail;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.AddressException;
 
@@ -13,10 +13,10 @@ public class test2 {
 
 	public static void main(String[] args) throws SQLException, AddressException, MessagingException {
 		// TODO Auto-generated method stub
-		String appPassword = "@Tana1234";
-		String email = "mhedheyghold12@gmail.com";
- mailSender  m = new mailSender(email,appPassword);
- m.sendEmail(email, appPassword, email);
+		String appPassword = System.getenv("APP_EMAIL1");
+		String email = System.getenv("APP_PASSWORD1");
+ apacheMail  m = new apacheMail(email,appPassword);
+ m.sendEmail("ojokayode566@gmail.com", "testing", email);
 
 
 

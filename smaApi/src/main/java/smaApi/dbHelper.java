@@ -17,10 +17,10 @@ public class dbHelper {
 	ArrayList<studentModel> studentsList;
 public ArrayList<String> getKeys() {
 	ArrayList<String> keys  = new ArrayList();
-	keys.add("LSMIST");
-	keys.add("2024");
-	keys.add("JaVa");
-	keys.add("Mira");
+	keys.add(System.getenv("KEY1"));
+	keys.add(System.getenv("KEY2"));
+	keys.add(System.getenv("KEY3"));
+	keys.add(System.getenv("KEY4"));
 
 	return keys;
 
@@ -30,7 +30,7 @@ public ArrayList<String> getKeys() {
 
 	public boolean addStudent(studentModel student) throws SQLException {
 	    String query = "INSERT INTO smaStudents (email, password) VALUES (?, ?)";
-	    try (Connection conn = db.connectDB("m0$t$m@");
+	    try (Connection conn = db.connectDB(System.getenv("DATABASE_PASSWORD"));
 	         PreparedStatement pstmt = conn.prepareStatement(query)) {
 
 	        if (!checkStudentExists(student.getEmail())) {
@@ -56,7 +56,7 @@ public ArrayList<String> getKeys() {
 		String query = "";
 		if (checkStudentExists(student.getEmail())) {
 			// TODO
-			db.executeQuery(query, "m0$t$m@");
+			db.executeQuery(query, System.getenv("DATABASE_PASSWORD"));
 			return true;
 
 		}
@@ -65,7 +65,8 @@ public ArrayList<String> getKeys() {
 
 	public boolean checkStudentExists(String email) throws SQLException {
 	    String query = "SELECT 1 FROM smaStudents WHERE email = ?";
-	    try (Connection conn = db.connectDB("m0$t$m@");
+//	    System.out.println(System.getenv("DATABASE_PASSWORD"));
+	    try (Connection conn = db.connectDB(System.getenv("DATABASE_PASSWORD"));
 	         PreparedStatement pstmt = conn.prepareStatement(query)) {
 
 	        pstmt.setString(1, email);
@@ -77,7 +78,7 @@ public ArrayList<String> getKeys() {
 
 	public ArrayList<studentModel> getAllStudent() throws Exception {
 		studentsList = new ArrayList();
-		ResultSet result = db.executeQuery("select * from smaStudents", "m0$t$m@");
+		ResultSet result = db.executeQuery("select * from smaStudents", System.getenv("DATABASE_PASSWORD"));
 		while (result.next()) {
 			studentModel res = new studentModel();
 			res.setUserID(result.getInt("userID")); // userID is an integer
@@ -120,7 +121,7 @@ public ArrayList<String> getKeys() {
 
 	private studentModel authenticate(String email, String password) throws SQLException {
 		// TODO Passwoed Encryption
-		ResultSet result = db.executeQuery("select * from smaStudents where email = '" + email + "'", "m0$t$m@");
+		ResultSet result = db.executeQuery("select * from smaStudents where email = '" + email + "'", System.getenv("DATABASE_PASSWORD"));
 		result.next();
 		try {
 			System.out.println(result.getString("password")+(PasswordCrypto.encrypt(password,key)));
@@ -145,7 +146,11 @@ public ArrayList<String> getKeys() {
 				res.setEndDate(result.getString("endDate")); // endDate is a date
 				res.setRole(result.getString("role")); // role is a string
 				res.setInstitution(result.getString("institution")); // institution is a string
-				res.setImgUrl(result.getString("imgUrl")); // imgUrl is a string
+				res.setImgUrl(result.getString("imgUrl"));
+				if (result.getString("imgUrl").equals("NOT_SET")){
+
+					res.setImgUrl("");		// imgUrl is a string
+				}
 				res.setCourse(result.getString("course"));
 				res.setPhoneNumber(result.getString("phonenumber"));
 				if(res.getStartDate()!=null){// course is a string
@@ -230,7 +235,7 @@ public ArrayList<String> getKeys() {
 		queryBuilder.append(String.join(", ", updateFields));
 		queryBuilder.append(" WHERE email = ?");
 
-		try (PreparedStatement stmt = db.connectDB("m0$t$m@").prepareStatement(queryBuilder.toString())) {
+		try (PreparedStatement stmt = db.connectDB(System.getenv("DATABASE_PASSWORD")).prepareStatement(queryBuilder.toString())) {
 			for (int i = 0; i < parameters.size(); i++) {
 				stmt.setObject(i + 1, parameters.get(i));
 			}
@@ -240,7 +245,7 @@ public ArrayList<String> getKeys() {
 
 			// Update studentgroup separately if it's provided
 			if (s.getGroup() != null) {
-				try (PreparedStatement groupStmt = db.connectDB("m0$t$m@")
+				try (PreparedStatement groupStmt = db.connectDB(System.getenv("DATABASE_PASSWORD"))
 						.prepareStatement("UPDATE smaStudents SET studentgroup = ? WHERE email = ?")) {
 					groupStmt.setString(1, s.getGroup());
 					groupStmt.setString(2, s.getEmail());
@@ -259,7 +264,7 @@ public ArrayList<String> getKeys() {
 	    String selectQuery = "SELECT password FROM smaStudents WHERE email = ?";
 	    String updateQuery = "UPDATE smaStudents SET password = ? WHERE email = ?";
 
-	    try (Connection conn = db.connectDB("m0$t$m@");
+	    try (Connection conn = db.connectDB(System.getenv("DATABASE_PASSWORD"));
 	         PreparedStatement selectStmt = conn.prepareStatement(selectQuery);
 	         PreparedStatement updateStmt = conn.prepareStatement(updateQuery)) {
 
@@ -304,7 +309,7 @@ public ArrayList<String> getKeys() {
 
 	public boolean updateProfilePicture(String email, String filePath) throws SQLException {
 	    String sql = "UPDATE smaStudents SET imgUrl = ? WHERE email = ?";
-	    try (Connection conn = db.connectDB("m0$t$m@");
+	    try (Connection conn = db.connectDB(System.getenv("DATABASE_PASSWORD"));
 	         PreparedStatement pstmt = conn.prepareStatement(sql)) {
 	        pstmt.setString(1, filePath);
 	        pstmt.setString(2, email);
@@ -318,7 +323,7 @@ public ArrayList<String> getKeys() {
 		 String selectQuery = "SELECT password FROM smaStudents WHERE email = ?";
 		    String updateQuery = "UPDATE smaStudents SET password = ? WHERE email = ?";
 
-		    try (Connection conn = db.connectDB("m0$t$m@");
+		    try (Connection conn = db.connectDB(System.getenv("DATABASE_PASSWORD"));
 		         PreparedStatement selectStmt = conn.prepareStatement(selectQuery);
 		         PreparedStatement updateStmt = conn.prepareStatement(updateQuery)) {
 
@@ -348,7 +353,7 @@ public ArrayList<String> getKeys() {
 		String selectQuery = "SELECT password FROM smaStudents WHERE email = ?";
 	    String updateQuery = "UPDATE smaStudents SET role = ? WHERE email = ?";
 
-	    try (Connection conn = db.connectDB("m0$t$m@");
+	    try (Connection conn = db.connectDB(System.getenv("DATABASE_PASSWORD"));
 	         PreparedStatement selectStmt = conn.prepareStatement(selectQuery);
 	         PreparedStatement updateStmt = conn.prepareStatement(updateQuery)) {
 
@@ -377,7 +382,7 @@ public ArrayList<String> getKeys() {
 	    String query = "INSERT INTO smaNotifications (title, content, time, author, status, timestamp, category) " +
 	                   "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-	    try (Connection conn = db.connectDB("m0$t$m@");
+	    try (Connection conn = db.connectDB(System.getenv("DATABASE_PASSWORD"));
 	         PreparedStatement pstmt = conn.prepareStatement(query)) {
 
 	        pstmt.setString(1, notification.getTitle());
@@ -405,7 +410,7 @@ public ArrayList<String> getKeys() {
 		String query = "select * from smaNotifications where category = '" +category.toLowerCase()+"'";
 
 		try {
-			ResultSet res = db.executeQuery(query, "m0$t$m@");
+			ResultSet res = db.executeQuery(query, System.getenv("DATABASE_PASSWORD"));
 			while (res.next()) {
 				NotificationModel currentNotification = new NotificationModel();
 				currentNotification.setAuthor(res.getString("author"));
@@ -427,6 +432,35 @@ public ArrayList<String> getKeys() {
 
 	public void deleteNotification(studentModel student) {
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	public boolean changeGroup(String email, String group) {
+		String selectQuery = "SELECT password FROM smaStudents WHERE email = ?";
+	    String updateQuery = "UPDATE smaStudents SET studentgroup = ? WHERE email = ?";
+
+	    try (Connection conn = db.connectDB(System.getenv("DATABASE_PASSWORD"));
+	         PreparedStatement selectStmt = conn.prepareStatement(selectQuery);
+	         PreparedStatement updateStmt = conn.prepareStatement(updateQuery)) {
+
+	        // Verify old password
+	        selectStmt.setString(1, email);
+	        try (ResultSet rs = selectStmt.executeQuery()) {
+	            if (rs.next()) {
+			        updateStmt.setString(1, group);
+			        updateStmt.setString(2, email);
+
+	        }
+	        // Update with new role
+
+
+	        int rowsAffected = updateStmt.executeUpdate();
+	        return rowsAffected > 0;
+	    }
+	} catch (SQLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+		return false;
 	}
 }

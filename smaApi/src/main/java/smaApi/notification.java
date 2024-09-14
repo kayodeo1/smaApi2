@@ -16,7 +16,7 @@ public class notification{
 	public void setData(ArrayList<NotificationModel> data) {
 		this.data = data;
 	}
-	
+
 	public void setType(String type) {
 		this.type = type;
 	}

@@ -12,6 +12,7 @@ import java.sql.Statement;
 public class connectDB {
 
 public Connection connectDB(String pwd) throws SQLException {
+	System.out.println(pwd);
 
 		try {
 		    Class.forName("org.postgresql.Driver");

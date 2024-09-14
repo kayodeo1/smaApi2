@@ -1,34 +1,61 @@
 package auth.kayodeo1.com;
 
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.util.Properties;
+
+import jakarta.mail.Authenticator;
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
+import jakarta.mail.PasswordAuthentication;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 
 public class apacheMail {
-    private static final String API_KEY = "YOUR_MAILGUN_API_KEY";
-    private static final String DOMAIN = "YOUR_MAILGUN_DOMAIN";
+    private String username;
+    private String password;
+    private String smtpHost = "smtp.office365.com";
+    private String smtpPort = "587";
 
-    public static void main(String[] args) {
-        try {
-            URL url = new URL("https://api.mailgun.net/v3/" + DOMAIN + "/messages");
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("POST");
-            connection.setDoOutput(true);
-            connection.setRequestProperty("Authorization", "Basic " + java.util.Base64.getEncoder().encodeToString(("api:" + API_KEY).getBytes()));
-            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+    // Constructor
+    public apacheMail(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
 
-            String postData = "from=you@yourdomain.com&to=recipient@example.com&subject=Test Email&text=Hello from Mailgun!";
-            try (OutputStream os = connection.getOutputStream()) {
-                os.write(postData.getBytes());
-                os.flush();
+    // Method to send an email
+    public void sendEmail(String recipientEmail, String subject, String messageContent) throws MessagingException {
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", smtpHost);
+        props.put("mail.smtp.port", smtpPort);
+        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+        props.put("mail.debug", "true");
+
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(username, password);
             }
+        });
 
-            int responseCode = connection.getResponseCode();
-            System.out.println("Response Code: " + responseCode);
+        try {
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(username));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
+            message.setSubject(subject);
+            message.setText(messageContent);
 
-            // Read response (not shown for brevity)
-        } catch (Exception e) {
-            e.printStackTrace();
+            Transport transport = session.getTransport("smtp");
+            transport.connect(smtpHost, Integer.parseInt(smtpPort), username, password);
+            transport.sendMessage(message, message.getAllRecipients());
+            transport.close();
+
+            System.out.println("Email sent successfully!");
+        } catch (MessagingException e) {
+            System.err.println("Error sending email: " + e.getMessage());
+            throw e;
         }
     }
 }

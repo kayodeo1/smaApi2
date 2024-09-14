@@ -15,12 +15,12 @@ public class dbHelper {
 		return;
 		}
 		String query = "insert into  smaAuth (email , code , time ) values ( '"+ instance.getEmail() + " ' , ' " + instance.getCode() + "','" + instance.getTime()+"')";
-		db.executeQuery(query, "m0$t$m@");
+		db.executeQuery(query, System.getenv("DATABASE_PASSWORD"));
 	}
 	public boolean checkInstance (String email) throws SQLException {
 		refresh();
 		String query = "select * from smaAuth where Trim(email) = '" + email+ "'";
-		if (db.executeQuery(query, "m0$t$m@").next()) {
+		if (db.executeQuery(query, System.getenv("DATABASE_PASSWORD")).next()) {
 			return true;
 		}
 
@@ -30,7 +30,7 @@ public class dbHelper {
 	public Instance validate (String email ) throws SQLException {
 		String query = "select * from smaAuth where Trim(email)='"+email+"'";
 		System.out.println();
-		ResultSet res = db.executeQuery(query, "m0$t$m@");
+		ResultSet res = db.executeQuery(query, System.getenv("DATABASE_PASSWORD"));
 
 		try {
 			if (res.next()) {
@@ -47,10 +47,10 @@ public class dbHelper {
 	 public void refresh () {
 		 long currentTime = Instant.now().getEpochSecond();
 		 String query = "Delete from smaAuth where (time::INTEGER) < "+currentTime;
-		 db.executeUpdate(query,"m0$t$m@");
+		 db.executeUpdate(query,System.getenv("DATABASE_PASSWORD"));
 	 }
 	 public void delete (String id) {
-		 db.executeUpdate("delete from smaAuth where email = '"+id+"'", "m0$t$m@");
+		 db.executeUpdate("delete from smaAuth where email = '"+id+"'", System.getenv("DATABASE_PASSWORD"));
 	 }
 
 }

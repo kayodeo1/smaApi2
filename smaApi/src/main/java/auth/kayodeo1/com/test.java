@@ -1,12 +1,14 @@
 package auth.kayodeo1.com;
 
 import java.sql.SQLException;
-import java.util.Scanner;
 
 public class test {
     public static void main(String[] args) throws SQLException {
 
 
+	    String email = System.getenv("APP_EMAIL");
+
+	    System.out.println(email+System.getenv("DATABASE_PASSWORD"));
 
     }
 //    public boolean isPilandrom(String word){

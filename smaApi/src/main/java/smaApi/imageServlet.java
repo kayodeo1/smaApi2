@@ -26,7 +26,6 @@ public class imageServlet extends HttpServlet {
 	private static final String UPLOAD_DIRECTORY = "profile_pictures";
 	dbHelper db = new dbHelper();
 
-	private dbHelper helper = new dbHelper();
 	jwtUtil JWT = new jwtUtil();
 
 	@Override
@@ -62,13 +61,13 @@ public class imageServlet extends HttpServlet {
 
 		}
 		userId = values.get("email").toString();
-
-		String uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIRECTORY;
+		String webAppPath = getServletContext().getRealPath("/");
+        File webAppsDir = new File(webAppPath).getParentFile();
+		String uploadPath = webAppsDir+ File.separator + UPLOAD_DIRECTORY;
 		File uploadDir = new File(uploadPath);
 		if (!uploadDir.exists()) {
 			uploadDir.mkdir();
 		}
-		int fileCount = uploadDir.list().length + 1;
 
 		// get extension
 		String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
@@ -94,7 +93,7 @@ public class imageServlet extends HttpServlet {
 		}
 
 		// Save file URI to database
-		String fileUri = "192.168.100.30/smaApi/" + UPLOAD_DIRECTORY + "/" + newFileName;
+		String fileUri = "192.168.100.30/" + UPLOAD_DIRECTORY + "/" + newFileName;
 		try {
 			db.updateProfilePicture(userId, fileUri);
 			output Out = new output("Success", "image uploaed successfully", userId, fileUri);

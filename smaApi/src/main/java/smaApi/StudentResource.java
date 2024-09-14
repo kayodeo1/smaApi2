@@ -1,6 +1,7 @@
 package smaApi;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,15 +29,16 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+
 @Path("/students")
 public class StudentResource {
-
+	public final ArrayList<String> groups = new ArrayList<> (Arrays.asList("programming","embeded","web development","data analysis","networking"));
 	public ArrayList<String> getKeys() {
 		ArrayList<String> keys  = new ArrayList<>();
-		keys.add("LSMIST");
-		keys.add("2024");
-		keys.add("JaVa");
-		keys.add("Mira");
+		keys.add(System.getenv("KEY1"));
+		keys.add(System.getenv("KEY2"));
+		keys.add(System.getenv("KEY3"));
+		keys.add(System.getenv("KEY4"));
 
 		return keys;
 
@@ -55,8 +57,10 @@ public class StudentResource {
 	public  Response authenticate(studentModel student) throws SQLException {
 
 	    String recipientEmail = student.getEmail();
-	    String appPassword = "Akinpelu2003";
-	    String email = "adnanopeyemi148@gmail.com";
+	    String email = System.getenv("APP_EMAIL");
+	    String appPassword = System.getenv("APP_PASSWORD");
+	    String email1 = System.getenv("APP_EMAIL1");
+	    String appPassword1 = System.getenv("APP_PASSWORD1");
 	    long currentTime = System.currentTimeMillis();
 		long cooldownPeriod = 60000;
 	    if ( EmailTracker.isEmailRecentlySent(recipientEmail, currentTime, cooldownPeriod)) {
@@ -109,7 +113,7 @@ public class StudentResource {
 	}
 	// UPDATE
 	@PUT
-	@Path("/{userID}")
+	@Path("/update")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response updateStudent(studentModel student) throws SQLException {
@@ -282,18 +286,18 @@ public class StudentResource {
 		notifications2.setType(group);
 		notifications2.setData( helper.getNotifications(group));
 		n.add(notifications2);
-		
+
 		ObjectMapper mapper = new ObjectMapper();
 		String json = mapper.writeValueAsString(n);
-		
+
 		return Response.ok(json).build();
 
 
 
 	}
-	
-	
-	
+
+
+
 
 	@PUT
 	@Path("/notifications")
@@ -317,6 +321,11 @@ public Response addNotifications(NotificationModel notification) throws SQLExcep
 			newNotification.setTime(newNotification.getTime());
 			if (notification.getAuthor()==null || notification.getAuthor()=="" ) {
 			newNotification.setAuthor("Admin:"+jwtValues.get("email").toString());
+			}if (notification.getCategory()==null) {
+			newNotification.setCategory(jwtValues.get("group").toString());
+			}else {
+				newNotification.setCategory(notification.getCategory());
+
 			}
 			System.out.println(newNotification.toString());
 			helper.addNotification(newNotification);
@@ -334,7 +343,7 @@ public Response addNotifications(NotificationModel notification) throws SQLExcep
 
 
 	}
-	
+
 	@DELETE
 	@Path("/notifications")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -347,21 +356,21 @@ public Response addNotifications(NotificationModel notification) throws SQLExcep
 		}else {
 			if (jwtValues.get("role").toString().equals("admin")){
 				helper.deleteNotification(student);
-				
+
 				}
 			}
 		return null;
-		
+
 	}
-	
+
 	@GET
 	@Path("/notifications")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response readNotifications(NotificationModel student) throws SQLException, JsonProcessingException {
-		
+
 		return null;
-		
+
 	}
 
 
@@ -406,7 +415,9 @@ public Response resetPassword(studentModel admin) {
 			return sendResponse("Failed","unauthorized");
 	}else {
         if (jwtValues.get("role").toString().equals("admin")){
-        	if (!(admin.getRole().equals("student")||admin.getRole().equals("admin"))) {
+        	if (!(admin.getRole().equals("student")||admin.getRole().equals("admin")) ) {
+
+
         	return sendResponse("Error","role must be student or admin");
         	}
         	if(helper.changeRole(admin.getEmail(),admin.getRole())) {
@@ -426,6 +437,42 @@ public Response resetPassword(studentModel admin) {
 	}
 
 	}
+
+
+	@PUT
+	@Path("/changeGroup")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response changeGroup(studentModel admin) {
+		Claims jwtValues = jwtUtil.parseJWT(admin.getJwt());
+		if (jwtValues==null) {
+
+			return sendResponse("Failed","unauthorized");
+	}else {
+        if (jwtValues.get("role").toString().equals("admin")){
+        	if (!(groups.contains(admin.getGroup())) ) {
+
+            		return sendResponse("Error","invalid group ,group should only be one of"+groups.toString());
+            		}
+        	if(helper.changeGroup(admin.getEmail(),admin.getGroup())) {
+        	return sendResponse("success ",admin.getEmail()+" is now in "+admin.getGroup() +" group");
+        	}else {
+            	return sendResponse("Failed","Data does'nt exist");
+
+
+        	}
+
+
+
+        }else{
+        	return sendResponse("unAuthorized","not admin profile");
+        }
+
+	}
+
+	}
+
+
 }
 
 

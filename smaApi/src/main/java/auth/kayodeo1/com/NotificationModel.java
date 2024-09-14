@@ -8,7 +8,7 @@ public class NotificationModel {
     private long timeStamp;
     private String author = "Admin";
     private String content;
-    private String category = "General";
+    private String category;
     private String jwt;
     private String time;
     private String status="unread";
