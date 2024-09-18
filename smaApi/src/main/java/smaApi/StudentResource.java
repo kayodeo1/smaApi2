@@ -220,6 +220,7 @@ public class StudentResource {
 		return sendResponse("Failed","Failed to change Password");
 	}
 
+	
 	@Path("/logout")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
