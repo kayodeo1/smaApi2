@@ -5,7 +5,7 @@ import java.time.Instant;
 public class auth {
 	dbHelper db = new dbHelper();
 
-	public  Instance genAuthInstance(String id ) {
+	public  synchronized Instance genAuthInstance(String id ) {
 		int code = generateCode();
 		long genTime = Instant.now().getEpochSecond();
 		long time = genTime+180;

@@ -38,5 +38,15 @@ public class PasswordCrypto {
 		System.out.println(value);
 
 	}
+
+	public static boolean verify(String password, String storedPassword,String key) throws Exception {
+//		System.out.println(encrypt(password,key)+" "+storedPassword);
+		String encryptedPassword = encrypt(password, key); 
+//		System.out.println(encryptedPassword.equals(storedPassword));
+
+		return encryptedPassword.equals(storedPassword);
+		
+		
+			}
 }
 

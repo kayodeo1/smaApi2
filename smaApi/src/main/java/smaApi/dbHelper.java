@@ -120,63 +120,59 @@ public ArrayList<String> getKeys() {
 	}
 
 	private studentModel authenticate(String email, String password) throws SQLException {
-		// TODO Passwoed Encryption
-		ResultSet result = db.executeQuery("select * from smaStudents where email = '" + email + "'", System.getenv("DATABASE_PASSWORD"));
-		result.next();
-		try {
-			System.out.println(result.getString("password")+(PasswordCrypto.encrypt(password,key)));
-			if (result.getString("password").equals(PasswordCrypto.encrypt(password,key))) {
-				System.out.println("here22");
-				studentModel res = new studentModel();
-				res.setUserID(result.getInt("userID")); // userID is an integer
-				res.setEmail(result.getString("email")); // email is a string
-				try {
-					res.setPassword(PasswordCrypto.encrypt(result.getString("password"), key));
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} // password is a string
-				res.setFirstName(result.getString("firstName")); // firstName is a string
-				res.setMiddleName(result.getString("middleName"));// middleName is a string
-				res.setLastName(result.getString("lastName")); // lastName is a string
-				res.setStartDate(result.getString("startDate")); // startDate is a date
-				res.setEndDate(result.getString("endDate")); // endDate is a date
-				res.setRole(result.getString("role")); // role is a string
-				res.setInstitution(result.getString("institution")); // institution is a string
-				res.setImgUrl(result.getString("imgUrl"));
-				if (result.getString("imgUrl").equals("NOT_SET")){
-
-					res.setImgUrl("");		// imgUrl is a string
-				}
-				res.setCourse(result.getString("course"));
-				res.setPhoneNumber(result.getString("phonenumber"));
-				if(res.getStartDate()!=null){// course is a string
-				res.setProgress(
-						res.getPercentComplete(res.getStartDate().replace("-", "/"), res.getEndDate().replace("-", "/"))); // progress
-																															// is
-																															// a
-				}else {
-					res.setProgress(0);// decimal
-				}
-				res.setStatus(result.getString("status")); // status is a string
-				res.setDuration(result.getString("duration"));
-				res.setGroup(result.getString("studentgroup"));
-				return res;
-			} else {
-				System.out.println("wrong pword");
-				return null;
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
+	    // TODO: Implement proper password hashing (do not use encryption for passwords)
+	    System.out.println("Trying to login: " + email);
+	    
+	    try (ResultSet result = db.executeQuery("SELECT * FROM smaStudents WHERE email ='"+email.trim()+"'",System.getenv("DATABASE_PASSWORD"))) {
+	        if (result.next()) {
+	            System.out.println("Got email " + result.getString("email"));
+	            
+	            String storedPassword = result.getString("password");
+	            if (PasswordCrypto.verify(password, storedPassword,key)) {
+	                System.out.println("Password verified");
+	                studentModel res = new studentModel();
+	                res.setUserID(result.getInt("userID"));
+	                res.setEmail(result.getString("email"));
+	                res.setPassword(storedPassword); // Store the hashed password
+	                res.setFirstName(result.getString("firstName"));
+	                res.setMiddleName(result.getString("middleName"));
+	                res.setLastName(result.getString("lastName"));
+	                res.setStartDate(result.getString("startDate"));
+	                res.setEndDate(result.getString("endDate"));
+	                res.setRole(result.getString("role"));
+	                res.setInstitution(result.getString("institution"));
+	                
+	                String imgUrl = result.getString("imgUrl");
+	                res.setImgUrl(imgUrl.equals("NOT_SET") ? "" : imgUrl);
+	                
+	                res.setCourse(result.getString("course"));
+	                res.setPhoneNumber(result.getString("phonenumber"));
+	                
+	                String startDate = res.getStartDate();
+	                String endDate = res.getEndDate();
+	                if (startDate != null && endDate != null) {
+	                    res.setProgress(res.getPercentComplete(startDate.replace("-", "/"), endDate.replace("-", "/")));
+	                } else {
+	                    res.setProgress(0);
+	                }
+	                
+	                res.setStatus(result.getString("status"));
+	                res.setDuration(result.getString("duration"));
+	                res.setGroup(result.getString("studentgroup"));
+	                
+	                return res;
+	            } else {
+	                System.out.println("Wrong password");
+	                return null;
+	            }
+	        } else {
+	            System.out.println("No user found with email: " + email);
+	            return null;
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        throw new SQLException("Authentication failed", e);
+	    }
 	}
 
 	public boolean updateStudent(studentModel s) throws SQLException {

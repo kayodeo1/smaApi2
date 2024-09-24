@@ -10,7 +10,7 @@ public class dbHelper {
 	connectDB db = new connectDB();
 	public void writeDb(Instance instance) throws SQLException {
 		refresh();
-		if (checkInstance(instance.getEmail())) {
+		if (checkInstance(instance.getEmail().strip())) {
 			delete(instance.getEmail());
 		return;
 		}
@@ -19,7 +19,7 @@ public class dbHelper {
 	}
 	public boolean checkInstance (String email) throws SQLException {
 		refresh();
-		String query = "select * from smaAuth where Trim(email) = '" + email+ "'";
+		String query = "select * from smaAuth where Trim(email) = '" + email.strip()+ "'";
 		if (db.executeQuery(query, System.getenv("DATABASE_PASSWORD")).next()) {
 			return true;
 		}
@@ -28,8 +28,8 @@ public class dbHelper {
 
 	}
 	public Instance validate (String email ) throws SQLException {
-		String query = "select * from smaAuth where Trim(email)='"+email+"'";
-		System.out.println();
+		String query = "select * from smaAuth where Trim(email)='"+email.strip()+"'";
+		System.out.println(query);
 		ResultSet res = db.executeQuery(query, System.getenv("DATABASE_PASSWORD"));
 
 		try {

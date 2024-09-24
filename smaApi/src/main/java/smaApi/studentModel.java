@@ -143,6 +143,7 @@ public class studentModel {
 	public void setJwt(String jwt) {
 		this.jwt = jwt;
 	}
+	
 	@Override
 	public String toString() {
 		return "studentModel [userID=" + userID + ", password=" + password + ", email=" + email + ", firstName="
@@ -150,8 +151,7 @@ public class studentModel {
 				+ ", endDate=" + endDate + ", role=" + role + ", institution=" + institution + ", jwt=" + jwt
 				+ ", imgUrl=" + imgUrl + ", course=" + course + ", progress=" + progress + ", status=" + status
 				+ ", duration=" + duration + ", group=" + group + ", oldPassword=" + oldPassword + ", newPassword="
-				+ newPassword + ", groupNotification=" + groupNotification + ", generalNotification="
-				+ generalNotification + "]";
+				+ newPassword + ", phoneNumber=" + phoneNumber + "]";
 	}
 	public int getUserID() {
 		return userID;

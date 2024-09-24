@@ -1,10 +1,14 @@
 package smaApi;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,7 +36,7 @@ import jakarta.ws.rs.core.Response;
 
 @Path("/students")
 public class StudentResource {
-	public final ArrayList<String> groups = new ArrayList<> (Arrays.asList("programming","embeded","web development","data analysis","networking"));
+	public final ArrayList<String> groups = new ArrayList<> (Arrays.asList("programming","embeded","web development","data analysis","networking","design","cyber security","game development"));
 	public ArrayList<String> getKeys() {
 		ArrayList<String> keys  = new ArrayList<>();
 		keys.add(System.getenv("KEY1"));
@@ -73,13 +77,13 @@ public class StudentResource {
 	    try {
 	        mailSender msg = new mailSender(email, appPassword);
 	        String subject = "Verification Mail from SMA Ministry of Science and Technology";
-	        int code = authenticate.genAuthInstance(recipientEmail).getCode();
+	        int code = authenticate.genAuthInstance(recipientEmail.trim()).getCode();
 	        System.out.println("fine here so far");
 
 	        String codeValue = String.format("%06d", code);
 	        String htmlContent = auth.generateHtmlContent(codeValue);
 
-	        msg.sendEmail(recipientEmail, subject, htmlContent);
+	        msg.sendEmail(recipientEmail.trim(), subject, htmlContent);
 
 	        return sendResponse("Successful", "Email Sent to " + recipientEmail);
 	    } catch (MessagingException e) {
@@ -122,8 +126,15 @@ public class StudentResource {
 
 			return sendResponse("Failed","can not update ,invalid or expire token");
 	}
-
-		System.out.println(jwtValues);
+		System.out.println("updating.....");
+		String errors="";
+		try {
+			errors = checkError(student);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			errors="date"+errors;
+		}
+		System.out.println(errors);
 		if (jwtValues.get("email").equals(student.getEmail())) {
 			if (helper.updateStudent(student)) {
 		        String decryptedPassword;
@@ -135,12 +146,12 @@ public class StudentResource {
 					return Response.ok(updatedStudent).build();
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
-					return sendResponse("failed","check inputs"+e.toString())	;
+					return sendResponse("failed","check inputs possible Errors:"+errors)	;
 					}
 
 			} else {
 
-				return sendResponse("Failed","No Field to update , update failed");
+				return sendResponse("Failed","No Field to update , update failed check :"+errors);
 		}
 		}
 
@@ -174,7 +185,9 @@ public class StudentResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response validate(validator student) throws SQLException {
-		String recipentEmail = student.getEmail();
+		System.out.println("validating ");
+		System.out.println(student.toString());
+		String recipentEmail = student.getEmail().trim();
 		int code = Integer.parseInt(student.getCode());
 		if (authenticate.validateAuthInstance(recipentEmail, code)) {
 			studentModel Student = new studentModel();
@@ -305,7 +318,7 @@ public class StudentResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 
-public Response addNotifications(NotificationModel notification) throws SQLException {
+public Response addNotifications(NotificationModel notification) throws Exception {
 		Claims jwtValues = jwtUtil.parseJWT(notification.getJwt());
 		if (jwtValues==null) {
 
@@ -330,9 +343,16 @@ public Response addNotifications(NotificationModel notification) throws SQLExcep
 			}
 			System.out.println(newNotification.toString());
 			helper.addNotification(newNotification);
+			CompletableFuture.runAsync(() -> {
+                try {
+                    newNotification.sendAsEmail(helper.getAllStudent());
+                } catch (Exception e) {
+                    // Log the exception
+                    System.err.println("Error sending email: " + e.getMessage());
+                }
+            });
 			return sendResponse("Success ","notification "+newNotification.getTitle()+" added");
-			//TODO send notification to all email and others
-
+			
 
 		}else {
 			return sendResponse("Failed"," not an admin , only an admin can add notification neefex");
@@ -472,7 +492,78 @@ public Response resetPassword(studentModel admin) {
 	}
 
 	}
-
+	 
+    public String checkError(studentModel student) throws ParseException {
+    	System.out.println(student.toString());
+    	ArrayList<String> errors = new ArrayList<String>();
+    	if (!student.getEmail().contains("@")) {
+    		errors.add("email is not valid");
+    	}if (student.getPhoneNumber().length()<10 || student.getPhoneNumber().length()>11 || student.getPhoneNumber()==null) {
+    		errors.add("phone number looks wrong");
+    		
+    	}if(!groups.contains(student.getGroup())) {
+    		errors.add("not a valid group");
+    	}if(!checkValidPassword(student.getPassword())) {
+    		errors.add("weak pasword");
+    		
+    		
+    	}
+    	if (!(student.getDuration()==null)) {
+    	if(!durationMatchesDates(student.getDuration(),student.getStartDate(),student.getEndDate())) {
+    		errors.add("duration does'nt match start and end date range");
+    	}
+    	}
+    	
+    		
+    	
+    	
+    	
+		return errors.toString();
+    	
+    	
+    	
+    }
+	private static boolean durationMatchesDates(String durationStr, String startDateStr, String endDateStr) {
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        Date startDate;
+		try {
+			startDate = sdf.parse(startDateStr);
+			Date endDate = sdf.parse(endDateStr);
+			 Date currentDate = new Date();	
+		        long currentDateMilli = currentDate.getTime();
+		        
+		        if (currentDateMilli>endDate.getTime()) {
+		        	return false;
+		        	
+		        }
+		        
+		        
+		        long totalDays =  (endDate.getTime() - startDate.getTime())/86400000;
+		        System.out.println(startDate.getTime());
+		        System.out.println(endDate.getTime());
+		        System.out.println(totalDays);
+		        int allowedError = 7;
+		        long duration = Long.parseLong(durationStr)*30;
+		        System.out.println(duration);
+		        if (duration<totalDays-allowedError || duration>totalDays+allowedError) {
+		        	return false;
+		        }
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			return false;
+		}
+        
+       
+        
+		 return true;
+	}
+	private boolean checkValidPassword(String password) {
+		
+		
+		return true;
+	}
+	
+	
 
 }
 
@@ -494,6 +585,8 @@ class EmailTracker {
     public static void recordEmailSent(String email, long currentTime) {
         emailSentRecords.put(email, currentTime);
     }
+    
+   
 
 
 }
